@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>從手動抄寫到自動串接：一次搞懂運動數據背後的技術門檻，以及 AI 教練為何重要</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.8;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #fafafa;
+        }
+        article {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+        h1 {
+            color: #1a1a2e;
+            font-size: 2.2em;
+            margin-bottom: 10px;
+            line-height: 1.3;
+        }
+        h2 {
+            color: #16213e;
+            font-size: 1.5em;
+            margin-top: 40px;
+            border-bottom: 3px solid #e94560;
+            padding-bottom: 10px;
+        }
+        h3 {
+            color: #0f3460;
+            font-size: 1.2em;
+            margin-top: 25px;
+        }
+        p {
+            margin: 15px 0;
+        }
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+            margin-bottom: 30px;
+        }
+        .highlight {
+            background: linear-gradient(120deg, #fff3cd 0%, #fff3cd 100%);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .code-block {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: "Fira Code", monospace;
+            font-size: 0.9em;
+            margin: 20px 0;
+        }
+        .code-block code {
+            color: #98c379;
+        }
+        .code-block .comment {
+            color: #5c6370;
+        }
+        .image-placeholder {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            border-radius: 12px;
+            margin: 30px 0;
+            font-size: 1.1em;
+        }
+        .image-placeholder.small {
+            padding: 30px 20px;
+            font-size: 0.95em;
+        }
+        blockquote {
+            border-left: 4px solid #e94560;
+            margin: 25px 0;
+            padding: 10px 20px;
+            background: #f8f9fa;
+            font-style: italic;
+        }
+        ul, ol {
+            margin: 15px 0;
+            padding-left: 25px;
+        }
+        li {
+            margin: 8px 0;
+        }
+        .btn {
+            display: inline-block;
+            background: #e94560;
+            color: white;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(233, 69, 96, 0.4);
+        }
+        .footer-note {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            color: #666;
+            font-size: 0.9em;
+        }
+        .eagle-box {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin: 40px 0;
+            text-align: center;
+        }
+        .eagle-box h3 {
+            color: #e94560;
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+    <article>
+        <h1>從手動抄寫到自動串接：一次搞懂運動數據背後的技術門檻，以及 AI 教練為何重要</h1>
+        <p class="subtitle">當你努力的汗水不該只留在紙上，而是成為你進步的養分</p>
+
+        <!-- 圖片位置：Strava API 串接流程圖 -->
+        <div class="image-placeholder">
+            📊 圖片位置：Strava OAuth 流程示意圖
+        </div>
+
+        <p>你有沒有想過，當你打開 Strava 看見今天的跑步距離、配速、心率……這些數據是怎麼「跑」到你的手機上的？</p>
+
+        <p>表面上看起來很簡單——打開 App，登入，按一下同步，結束。但如果你想自己動手做點什麼，比如把運動數據接進自己的系統、做個性化的分析報告，或是讓 AI 幫你規劃訓練，那就完全是另一回事了。</p>
+
+        <p>今天我想聊聊 <strong>Eagle Notes</strong> 在串接 Strava API 時踩過的坑，以及我們從中體悟到的——為什麼 AI 教練不是只有「給建議」就好，而是要有「數據來源」加上「自動化能力」，才能真正幫到你。</p>
+
+        <!-- 圖片位置：辛苦開發的示意圖 -->
+        <div class="image-placeholder small">
+            💻 圖片位置：工程師對著螢幕 debug 的示意圖
+        </div>
+
+        <h2>一、串接 Strava API？聽起來不難啊</h2>
+
+        <p>一開始我們也是這麼想的。Strava 有完整的 API 文件，照著做不就好了？</p>
+
+        <p>結果證明，我們太天真了。</p>
+
+        <h3>1. OAuth 流程：不是只有按一個按鈕那麼簡單</h3>
+
+        <p>Strava 使用的是 OAuth 2.0 認證機制。簡單來說，流程是這樣的：</p>
+
+        <ol>
+            <li>使用者點擊「用 Strava 登入」</li>
+            <li>跳轉到 Strava 的授權頁面，使用者同意讓我們存取數據</li>
+            <li>Strava 會把使用者導回我們指定的 <code>redirect_uri</code>，並夾帶一個 <code>code</code></li>
+            <li>我們用這個 <code>code</code> 去換取 <code>access_token</code></li>
+            <li>最後，用這個 token 來叫用 API 取得運動數據</li>
+        </ol>
+
+        <p>聽起來很標準？但問題才剛開始。</p>
+
+        <h3>2. redirect_uri 的地雷</h3>
+
+        <p>Strava 的 API 對 <code>redirect_uri</code> 有嚴格的要求——<strong>必須完全符合</strong>你在 Strava 開發者後台註冊的 URL，連一個斜線都不能差。</p>
+
+        <p>我們一開始在本地端測試，用的是 <code>http://localhost:3000/callback</code>，結果部署到正式環境後，换成 <code>https://eagle-notes.com/callback</code>，就這樣炸了。</p>
+
+        <div class="code-block">
+<code>錯誤訊息：
+Redirect URI mismatch</code>
+        </div>
+
+        <p>後來我們學乖了，把所有可能的環境（本地、測試、生產）都註冊到 Strava 的應用程式設定裡。解決方法不難，但過程真的很折騰。</p>
+
+        <h3>3. Token 過期與重新整理</h3>
+
+        <p>Strava 的 <code>access_token</code> 有 6 小時的有效期。6 小時後，你的系統就會發現：唉怎麼資料拿不到了？</p>
+
+        <p>這時候你需要 <code>refresh_token</code> 來刷新。但麻煩的是，<strong>每次刷新都會給你一組新的 token</strong>，舊的直接失效。如果你的系統有多個地方在用 token，很容易出現「A 刷新後 B 失效」的Race Condition。</p>
+
+        <p>我們後來做了一個 Token Manager，統一管理刷新邏輯，確保所有模組都用同一組有效的 token。這件事不難，但需要經驗——沒踩過坑不會知道。</p>
+
+        <!-- 圖片位置：Token 刷新流程圖 -->
+        <div class="image-placeholder small">
+            🔑 圖片位置：Token 刷新與管理示意圖
+        </div>
+
+        <h2>二、防爬蟲？沒有瀏覽器？這些才是大魔王</h2>
+
+        <p>如果你以為 API 串接就是最難的部分，那麼接下來的問題會讓你重新思考人生。</p>
+
+        <h3>1. Strava 的防爬蟲機制</h3>
+
+        <p>Strava 並不反對開發者使用 API，但他們對於異常流量非常敏感。如果你短時間內發送太多請求、從來不緩存資料、或是行為模式看起來像機器人——對不起，你的 API Key 很可能會被暫時封鎖。</p>
+
+        <p>我們曾經做過一個「每分鐘同步一次」的自動化任務，結果跑沒多久就被擋下來了。後來學會了：</p>
+
+        <ul>
+            <li><strong>實作指數退避（Exponential Backoff）</strong>：被擋就等一下，然後再試，時間拉長</li>
+            <li><strong>善用 Webhook</strong>： Strava 有事件通知機制，運動結束後主動推給我們，不用一直 polling</li>
+            <li><strong>本地緩存 + 差量更新</strong>：只拿有變化的資料，不要每次都全文下載</li>
+        </ul>
+
+        <h3>2. 沒有瀏覽器環境的困境</h3>
+
+        <p>這點可能是最容易被忽略的問題。</p>
+
+        <p>很多運動 App（不只是 Strava）以為使用者都會用手機或電腦操作。但當你想在伺服器上定時抓資料、做一些自動化分析時，你會發現——<strong>很多 API 壓根沒有考慮過「非瀏覽器」的場景</strong>。</p>
+
+        <p>比如說，有些 API 要求你必須有有效的 session、必須通過 JavaScript 渲染的頁面驗證、或是需要操作瀏覽器 cookie。這些在人類眼裡「很正常」的操作，放到伺服器端就變成了技術障礙。</p>
+
+        <p>我們後來用了 Puppeteer 來模擬瀏覽器行為，才解決了某些需要「人為操作」的環節。代價是：伺服器資源變多、維護變複雜、速度變慢。</p>
+
+        <blockquote>
+            「本來只是想抓個數據，結果需要養一台無頭瀏覽器。」——某工程師的心聲
+        </blockquote>
+
+        <!-- 圖片位置：瀏覽器 vs 伺服器示意圖 -->
+        <div class="image-placeholder small">
+            🌐 圖片位置：瀏覽器環境 vs 伺服器環境的差異
+        </div>
+
+        <h2>三、這些困難告訴我們的事：AI 教練不是只會說「加油」</h3>
+
+        <p>好，講了這麼多技術細節，你可能會問：所以呢？</p>
+
+        <p>所以我們從這些折騰中，體悟到了一個很重要的道理：<strong>一個好的 AI 教練，不能只是給建議。</strong></p>
+
+        <h3>1. 沒有數據，AI 什麼都不是</h3>
+
+        <p>你叫 AI 幫你分析訓練成效，但如果你沒有可靠的數據來源——那些建議頂多只是「多休息」、「跑慢一點」之類的廢話。</p>
+
+        <p>真正的 AI 教練需要：</p>
+
+        <ul>
+            <li><strong>穩定的數據來源</strong>：不只是 Strava，可能是 Apple Health、Google Fit、Garmin……每個來源的格式都不一樣，你需要一個翻譯層</li>
+            <li><strong>即時的同步能力</strong>：如果你跑完步還要手動輸入數據，那跟寫日記有什麼兩樣？</li>
+            <li><strong>數據品質的把關</strong>：GPS 漂移、心率異常、設備没同步……AI 需要懂得過濾雜訊</li>
+        </ul>
+
+        <p>這就是為什麼 Eagle Notes 願意花這麼多時間在「串接」這件事上。我們知道，<strong>最好的建議來自於最真實的數據</strong>。</p>
+
+        <!-- 圖片位置：數據匯流示意圖 -->
+        <div class="image-placeholder small">
+            📈 圖片位置：多來源數據匯流示意圖
+        </div>
+
+        <h3>2. 自動化才是關鍵</h3>
+
+        <p>假設你今天有一個完美的 AI 教練，它分析你的訓練、給你客製化的建議……但如果你每次都要自己把數據複製貼上，那請問這個「教練」跟 Google 有什麼兩樣？</p>
+
+        <p><strong>自動化</strong>才是讓 AI 教練發揮價值的關鍵：</p>
+
+        <ul>
+            <li>運動結束 → 自動同步 → AI 分析 → 訓練建議</li>
+            <li>每週數據趨勢 → 自動產出報告 → 調整下週目標</li>
+            <li>異常警訊（恢復時間不足、訓練過度）→ 主動通知</li>
+        </ul>
+
+        <p>這整個流程，需要的是技術堆疊——從 API 串接、資料庫儲存、自動化排程、到 AI 推理——每一層都不能有短板。</p>
+
+        <p>這也是 Eagle Notes 正在做的事。我們不只想做一個「會說話的訓練計劃」，我們想做的，是<strong>一個會自己幫你搞定一切的 AI 教練</strong>。</p>
+
+        <h2>四、寫在最後：運動、思辨、語言，與日常練習</h2>
+
+        <p>回到 Eagle Notes 的核心理念。</p>
+
+        <p>我們相信，<strong>變成更好的自己</strong>不是靠單一一件事，而是把很多「小練習」一點點累積起來——</p>
+
+        <ul>
+            <li><strong>運動</strong>讓你擁有健康的基礎</li>
+            <li><strong>思辨</strong>讓你懂得問對的問題</li>
+            <li><strong>語言</strong>讓你看到更大的世界</li>
+            <li><strong>日常練習</strong>讓一切不再是口號</li>
+        </ul>
+
+        <p>而串接 Strava、自動化數據、AI 分析……這些技術，都是為了讓「運動」這件事不再只是三分鐘熱度，而是成為你日常練習的一部分——<strong>不需要額外的意志力，系統幫你記得，AI 幫你想下一步</strong>。</p>
+
+        <div class="eagle-box">
+            <h3>Eagle Notes</h3>
+            <p>把運動、思辨、語言與日常練習，<br>慢慢活成更好的自己。</p>
+            <a href="#" class="btn">了解更多 →</a>
+        </div>
+
+        <p>如果你也是那種想要認真訓練、但不想被繁瑣的記錄工作綁住的人——歡迎加入我們，一起用技術幫運動加點魔法。✨</p>
+
+        <div class="footer-note">
+            <p>📝 此文章同步發布於 <a href="#">Eagle Notes Blog</a></p>
+            <p>💬 有任何問題？歡迎來 <a href="#">Discord</a> 或 <a href="#">Telegram</a> 找我們聊聊</p>
+        </div>
+    </article>
+</body>
+</html>
